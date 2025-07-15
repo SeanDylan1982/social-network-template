@@ -1,0 +1,111 @@
+import React from 'react';
+import Image from 'next/image';
+import { Story as StoryType } from '../../types';
+
+interface StoriesProps {
+  stories?: StoryType[];
+  onAddStory?: () => void;
+  onStoryClick?: (id: string) => void;
+  className?: string;
+}
+
+const Stories: React.FC<StoriesProps> = ({ 
+  stories = [], 
+  onAddStory,
+  onStoryClick = () => {},
+  className = ''
+}) => {
+  // Sample data for demonstration
+  const sampleStories: StoryType[] = [
+    {
+      id: '1',
+      username: 'jane_doe',
+      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      seen: false
+    },
+    {
+      id: '2',
+      username: 'mike_t',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      seen: true
+    },
+    {
+      id: '3',
+      username: 'sarah_w',
+      avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
+      seen: false
+    },
+    {
+      id: '4',
+      username: 'alex_j',
+      avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+      seen: true
+    },
+    {
+      id: '5',
+      username: 'emily_r',
+      avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+      seen: false
+    }
+  ];
+
+  // Use sample data if no stories provided
+  const displayStories = stories.length > 0 ? stories : sampleStories;
+
+  return (
+    <div className={`flex overflow-x-auto gap-4 py-4 mb-6 px-4 scrollbar-hide ${className}`}>
+      {/* Add Story Button */}
+      <div 
+        className="flex-shrink-0 flex flex-col items-center cursor-pointer group" 
+        onClick={() => onAddStory?.()}
+      >
+        <div className="relative w-20 h-20 rounded-full bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center mb-1.5 group-hover:bg-gray-100 transition-colors">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white group-hover:bg-blue-600 transition-colors">
+            <span className="text-xl leading-none">+</span>
+          </div>
+        </div>
+        <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+          Your Story
+        </span>
+      </div>
+      
+      {/* Story Items */}
+      {displayStories.map((story) => (
+        <div 
+          key={story.id} 
+          className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
+          onClick={() => onStoryClick(story.id)}
+        >
+          <div 
+            className={`relative w-20 h-20 rounded-full p-0.5 mb-1.5 transition-all group-hover:scale-105 ${
+              story.seen 
+                ? 'bg-gray-200' 
+                : 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 shadow-lg'
+            }`}
+          >
+            <div className="bg-white p-0.5 rounded-full">
+              <div className="relative w-full h-full rounded-full overflow-hidden">
+                <Image
+                  src={story.avatar}
+                  alt={story.username}
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                  priority
+                />
+              </div>
+            </div>
+            {!story.seen && (
+              <div className="absolute inset-0 rounded-full border-2 border-transparent animate-pulse"></div>
+            )}
+          </div>
+          <span className="text-xs text-gray-600 group-hover:text-gray-900 transition-colors truncate max-w-[80px]">
+            {story.username}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Stories;

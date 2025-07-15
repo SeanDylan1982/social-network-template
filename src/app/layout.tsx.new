@@ -1,0 +1,42 @@
+'use client';
+
+import * as React from 'react';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { theme } from '@/theme';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter'
+});
+
+export const metadata: Metadata = {
+  title: 'Social Network',
+  description: 'Connect with friends and the world around you',
+};
+
+export const viewport = {
+  themeColor: '#2F80ED',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {children}
+          </ThemeProvider>
+        </AppRouterCacheProvider>
+      </body>
+    </html>
+  );
+}
