@@ -1,480 +1,490 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Box, Typography, Button, Paper, Avatar, Divider, IconButton, TextField, InputAdornment } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { useAuth } from "@/context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { CircularProgress } from '@mui/material';
 import { 
-  AddPhotoAlternate, 
-  Videocam, 
-  EmojiEmotions, 
-  LocationOn, 
-  MoreHoriz as MoreHorizIcon,
-  ThumbUp as ThumbUpIcon,
-  ChatBubbleOutline as ChatBubbleOutlineIcon,
-  Share as ShareIcon
+  Box, 
+  Container, 
+  Grid, 
+  Hidden, 
+  Button, 
+  TextField, 
+  Avatar, 
+  IconButton,
+  Typography,
+  Divider,
+  Paper,
+  Tabs,
+  Tab,
+  TabPanel,
+  Stack,
+  Skeleton,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import { 
+  PhotoCamera as PhotoCameraIcon, 
+  EmojiEmotions as EmojiIcon,
+  Send as SendIcon,
+  Add as AddIcon,
+  TrendingUp as TrendingUpIcon,
+  Notifications as NotificationsIcon,
+  Bookmark as BookmarkIcon,
+  Chat as ChatIcon,
+  Group as GroupIcon,
+  VideoCameraFront as VideoCameraFrontIcon,
+  Image as ImageIcon,
+  Videocam as VideocamIcon,
+  EventAvailable as EventAvailableIcon,
+  Mood as MoodIcon
 } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 
-// Styled components for the feed
-const FeedContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(3),
-  maxWidth: '1200px',
-  margin: '0 auto',
-  width: '100%',
-  padding: theme.spacing(3, 0),
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(2),
-  },
-}));
+// Components
+import Post from "@/components/posts/Post";
+import PostComposer from "@/components/posts/PostComposer";
+import StoriesBar from "@/components/stories/StoriesBar";
+import WhoToFollow from "@/components/whoToFollow/WhoToFollow";
+import News from "@/components/news/News";
+import Trending from "@/components/trending/Trending";
+import Notifications from "@/components/notifications/Notifications";
+import Bookmarks from "@/components/bookmarks/Bookmarks";
+import Chat from "@/components/chat/Chat";
+import Groups from "@/components/groups/Groups";
+import Events from "@/components/events/Events";
+import Celebrations from "@/components/celebrations/Celebrations";
+import Videos from "@/components/videos/Videos";
+import Photos from "@/components/photos/Photos";
 
-const PostComposer = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: theme.shape.borderRadius * 1.5,
-  boxShadow: theme.shadows[1],
-  backgroundColor: theme.palette.background.paper,
-  transition: theme.transitions.create(['box-shadow', 'transform']),
-  '&:hover': {
-    boxShadow: theme.shadows[4],
-    transform: 'translateY(-2px)',
-  },
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: theme.palette.background.default,
-    borderRadius: theme.shape.borderRadius * 2,
-    '& fieldset': {
-      borderColor: theme.palette.divider,
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-    },
-  },
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1.5, 2),
-    fontSize: '1rem',
-    '&::placeholder': {
-      opacity: 0.7,
-    },
-  },
-}));
-
-const PostCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: theme.shape.borderRadius * 1.5,
-  boxShadow: theme.shadows[1],
-  backgroundColor: theme.palette.background.paper,
-  transition: theme.transitions.create(['box-shadow', 'transform']),
-  '& + &': {
-    marginTop: theme.spacing(3),
-  },
-  '&:hover': {
-    boxShadow: theme.shadows[4],
-    transform: 'translateY(-2px)',
-  },
-}));
-
-const StoryItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  width: 100,
-  flexShrink: 0,
-  cursor: 'pointer',
-  '&:hover': {
-    '& .MuiAvatar-root': {
-      transform: 'scale(1.05)',
-    },
-    '& .story-username': {
-      color: theme.palette.primary.main,
-    },
-  },
-}));
-
-const StoryAvatar = styled(Avatar)(({ theme }) => ({
-  width: 100,
-  height: 100,
-  marginBottom: theme.spacing(1),
-  border: '3px solid',
-  borderColor: theme.palette.primary.main,
-  transition: 'transform 0.2s ease-in-out, border-color 0.2s ease',
-  '&.add-story': {
-    borderColor: theme.palette.divider,
-    backgroundColor: theme.palette.background.default,
-    color: theme.palette.text.secondary,
-    fontSize: '1.75rem',
-    '&:hover': {
-      borderColor: theme.palette.primary.main,
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.main,
-    },
-  },
-}));
-
-const StoriesContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-  padding: theme.spacing(2),
-  overflowX: 'auto',
-  scrollbarWidth: 'none',
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius * 1.5,
-  boxShadow: theme.shadows[1],
-  '&::-webkit-scrollbar': {
+// Styled components
+const StickySidebar = styled('div')(({ theme }) => ({
+  position: 'sticky',
+  top: theme.spacing(10),
+  [theme.breakpoints.down('lg')]: {
     display: 'none',
   },
-  msOverflowStyle: 'none',
-  '&::after': {
-    content: '""',
-    paddingRight: theme.spacing(1),
+  [theme.breakpoints.down('md')]: {
+    display: 'block',
+    position: 'relative',
+    top: 0,
   },
 }));
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  textTransform: 'none',
-  fontWeight: 500,
-  color: theme.palette.text.secondary,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(0.75, 1.75),
+const CreatePostCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: theme.shadows[2],
+  transition: theme.transitions.create(['box-shadow']),
   '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-    color: theme.palette.primary.main,
-  },
-  '& .MuiSvgIcon-root': {
-    fontSize: '1.125rem',
-    marginRight: theme.spacing(0.75),
+    boxShadow: theme.shadows[4],
   },
 }));
 
-const PostActionButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  padding: theme.spacing(1),
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-    color: theme.palette.primary.main,
-  },
-  '&.active': {
-    color: theme.palette.primary.main,
-  },
-  '& .MuiSvgIcon-root': {
-    fontSize: '1.25rem',
+const MainContent = styled('div')(({ theme }) => ({
+  maxWidth: '680px',
+  width: '100%',
+  margin: '0 auto',
+  padding: theme.spacing(2),
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(1),
   },
 }));
 
-const LikeButton = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  backgroundColor: theme.palette.primary.light,
-  color: theme.palette.primary.main,
-  padding: theme.spacing(0.5, 1.25),
-  borderRadius: theme.shape.borderRadius * 1.5,
-  cursor: 'pointer',
-  transition: theme.transitions.create(['background-color', 'transform']),
-  '&:hover': {
-    backgroundColor: theme.palette.primary.light + '80',
-    transform: 'scale(1.05)',
+const SidebarContent = styled(Paper)(({ theme }) => ({
+  width: '312px',
+  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: theme.shadows[2],
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
+    margin: theme.spacing(2, 0),
+  },
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+    margin: theme.spacing(1, 0),
   },
 }));
 
-import RightSidebarContent from '@/components/layout/RightSidebarContent';
+// Mock data
+const stories = [
+  {
+    id: '1',
+    username: 'johndoe',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    seen: false,
+  },
+  {
+    id: '2',
+    username: 'janesmith',
+    avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+    seen: false,
+  },
+  {
+    id: '3',
+    username: 'mikejohnson',
+    avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
+    seen: true,
+  },
+  {
+    id: '4',
+    username: 'sarahwilson',
+    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+    seen: false,
+  },
+  {
+    id: '5',
+    username: 'davidbrown',
+    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+    seen: true,
+  },
+];
 
-export default function Home() {
-  // State for post content and interactions
+const suggestedUsers = [
+  {
+    id: '1',
+    name: 'Tech News',
+    username: 'technews',
+    avatar: 'https://picsum.photos/200/200?random=1',
+    bio: 'Latest in technology and gadgets',
+    isFollowing: false,
+  },
+  {
+    id: '2',
+    name: 'Web Dev',
+    username: 'webdev',
+    avatar: 'https://picsum.photos/200/200?random=2',
+    bio: 'Web development resources and tutorials',
+    isFollowing: false,
+  },
+  {
+    id: '3',
+    name: 'React',
+    username: 'reactjs',
+    avatar: 'https://picsum.photos/200/200?random=3',
+    bio: 'The official React.js account',
+    isFollowing: true,
+  },
+];
+
+const newsItems = [
+  {
+    id: '1',
+    title: 'New JavaScript framework breaks performance records',
+    source: 'TechCrunch',
+    timeAgo: '2h ago',
+    image: 'https://picsum.photos/200/200?random=4',
+    category: 'Technology',
+    isTrending: true,
+  },
+  {
+    id: '2',
+    title: 'The future of remote work in 2025',
+    source: 'Forbes',
+    timeAgo: '5h ago',
+    image: 'https://picsum.photos/200/200?random=5',
+    category: 'Business',
+  },
+  {
+    id: '3',
+    title: 'How AI is transforming healthcare',
+    source: 'Wired',
+    timeAgo: '1d ago',
+    image: 'https://picsum.photos/200/200?random=6',
+    category: 'Health',
+    isTrending: true,
+  },
+];
+
+const posts = [
+  {
+    id: '1',
+    author: {
+      name: 'John Doe',
+      avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+      username: 'johndoe',
+    },
+    content: 'Just launched my new portfolio website! Check it out and let me know what you think. #webdev #portfolio',
+    media: 'https://picsum.photos/800/400?random=1',
+    timestamp: '2h ago',
+    likes: 42,
+    comments: 8,
+    shares: 3,
+    isLiked: false,
+    isBookmarked: false,
+  },
+  {
+    id: '2',
+    author: {
+      name: 'Jane Smith',
+      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+      username: 'janesmith',
+    },
+    content: 'Beautiful day for a hike! Nature always helps me clear my mind and get new ideas. 🏞️ #outdoors #inspiration',
+    media: 'https://picsum.photos/800/400?random=2',
+    timestamp: '5h ago',
+    likes: 128,
+    comments: 24,
+    shares: 7,
+    isLiked: true,
+    isBookmarked: false,
+  },
+];
+
+const Home: React.FC = () => {
+  const { user, isAuthenticated, loading } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [activeTab, setActiveTab] = useState('home');
+
+  const { data: postsData, isLoading: postsLoading } = useQuery({
+    queryKey: ['posts'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts');
+      }
+      return response.json();
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 300000, // 5 minutes
+  });
+
+  const { data: storiesData, isLoading: storiesLoading } = useQuery({
+    queryKey: ['stories'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stories`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stories');
+      }
+      return response.json();
+    },
+  });
+
+  const { data: suggestedUsersData, isLoading: suggestedUsersLoading } = useQuery({
+    queryKey: ['suggestedUsers'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/suggested`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch suggested users');
+      }
+      return response.json();
+    },
+  });
+
+  const { data: newsItemsData, isLoading: newsItemsLoading } = useQuery({
+    queryKey: ['newsItems'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch news items');
+      }
+      return response.json();
+    },
+  });
   const [postContent, setPostContent] = useState('');
-  const [activePost, setActivePost] = useState<number | null>(null);
-  const [likedPosts, setLikedPosts] = useState<number[]>([]);
+  const [localPosts, setLocalPosts] = useState(posts);
 
-  // Mock data
-  const stories = [
-    { id: 1, name: 'Your Story', isAdd: true },
-    { id: 2, name: 'Alex', avatar: '/images/avatars/1.jpg' },
-    { id: 3, name: 'Sarah', avatar: '/images/avatars/2.jpg' },
-    { id: 4, name: 'Mike', avatar: '/images/avatars/3.jpg' },
-    { id: 5, name: 'Emma', avatar: '/images/avatars/4.jpg' },
-    { id: 6, name: 'David', avatar: '/images/avatars/5.jpg' },
-  ];
-
-  const posts = [
-    {
-      id: 1,
-      user: {
-        name: 'Alex Johnson',
-        avatar: '/images/avatars/1.jpg',
-        role: 'UI/UX Designer',
-      },
-      time: '2 hours ago',
-      content: 'Just launched our new product! Check it out and let me know what you think. #design #uiux',
-      image: '/images/posts/1.jpg',
-      likes: 42,
-      comments: 12,
-      shares: 5,
-      isLiked: false,
-    },
-    {
-      id: 2,
-      user: {
-        name: 'Sarah Wilson',
-        avatar: '/images/avatars/2.jpg',
-        role: 'Frontend Developer',
-      },
-      time: '5 hours ago',
-      content: 'Beautiful day for coding outside! ☀️ Working on some exciting new features for our platform.',
-      image: '/images/posts/2.jpg',
-      likes: 28,
-      comments: 7,
-      shares: 2,
-      isLiked: true,
-    },
-  ];
-
-  const handleLike = (postId: number) => {
-    setLikedPosts(prev => 
-      prev.includes(postId) 
-        ? prev.filter(id => id !== postId)
-        : [...prev, postId]
-    );
+  const handleAddStory = () => {
+    console.log('Add story clicked');
+    // Handle add story
   };
 
-  const handlePostSubmit = (e: React.FormEvent) => {
+  const handleStoryClick = (id: string) => {
+    console.log(`Story ${id} clicked`);
+    // Handle story click
+  };
+
+  const handleFollowUser = (userId: string) => {
+    console.log(`Follow user ${userId}`);
+    // Handle follow user
+  };
+
+  const handleDismissSuggestion = (userId: string) => {
+    console.log(`Dismiss suggestion ${userId}`);
+    // Handle dismiss suggestion
+  };
+
+  const handleNewsClick = (id: string) => {
+    console.log(`News item ${id} clicked`);
+    // Handle news item click
+  };
+
+  const handleShowMore = (type: string) => {
+    console.log(`Show more ${type}`);
+    // Handle show more
+  };
+
+  const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();
     if (postContent.trim()) {
-      // In a real app, you would send this to your backend
-      console.log('Post submitted:', postContent);
+      const newPost = {
+        id: Date.now().toString(),
+        author: {
+          name: 'Current User',
+          avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+          username: 'currentuser',
+        },
+        content: postContent,
+        timestamp: 'Just now',
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        isLiked: false,
+        isBookmarked: false,
+      };
+      
+      setLocalPosts([newPost, ...localPosts]);
       setPostContent('');
     }
   };
 
-  return (
-    <Box sx={{ display: 'flex', gap: 3 }}>
-      <FeedContainer>
-      {/* Stories */}
-      <Paper sx={{ 
-        borderRadius: 2, 
-        mb: 3, 
-        overflow: 'hidden',
-        backgroundColor: 'background.paper',
-      }}>
-        <StoriesContainer>
-          {stories.map((story) => (
-            <StoryItem key={story.id}>
-              <StoryAvatar 
-                src={story.avatar} 
-                className={story.isAdd ? 'add-story' : ''}
-              >
-                {story.isAdd ? '+' : null}
-              </StoryAvatar>
-              <Typography 
-                variant="caption" 
-                noWrap 
-                className="story-username"
-                sx={{ 
-                  fontSize: '0.7rem',
-                  color: 'text.secondary',
-                  maxWidth: '100%',
-                  display: 'block',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {story.name}
-              </Typography>
-            </StoryItem>
-          ))}
-        </StoriesContainer>
-      </Paper>
-      
-      {/* Create Post */}
-      <PostComposer component="form" onSubmit={handlePostSubmit} elevation={0}>
-        <Box display="flex" gap={2} mb={2}>
-          <Avatar 
-            src="/images/avatars/1.jpg" 
-            sx={{ width: 40, height: 40 }}
-          />
-          <TextField
-            fullWidth
-            placeholder="What's on your mind?"
-            variant="outlined"
-            size="small"
-            value={postContent}
-            onChange={(e) => setPostContent(e.target.value)}
-            InputProps={{
-              sx: { pl: 2 },
-            }}
-          />
-        </Box>
-        <Divider sx={{ my: 1.5 }} />
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" gap={1}>
-            <PostActionButton>
-              <AddPhotoAlternate fontSize="small" />
-            </PostActionButton>
-            <PostActionButton>
-              <Videocam fontSize="small" />
-            </PostActionButton>
-            <PostActionButton>
-              <EmojiEmotions fontSize="small" />
-            </PostActionButton>
-            <PostActionButton>
-              <LocationOn fontSize="small" />
-            </PostActionButton>
-          </Box>
-          <Button 
-            variant="contained" 
-            size="small" 
-            type="submit"
-            disabled={!postContent.trim()}
-            sx={{ 
-              borderRadius: 4,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 2,
-              py: 0.5,
-            }}
-          >
-            Post
-          </Button>
-        </Box>
-      </PostComposer>
-      
-      {/* Posts */}
-      {posts.map((post) => (
-        <PostCard key={post.id}>
-          <Box display="flex" alignItems="center" mb={2.5}>
-            <Avatar 
-              src={post.user.avatar} 
-              sx={{ 
-                width: 48, 
-                height: 48, 
-                mr: 2,
-                border: '2px solid',
-                borderColor: 'primary.main',
-              }} 
-            />
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="subtitle1" fontWeight={600} noWrap>
-                {post.user.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {post.user.role} • {post.time}
-              </Typography>
-            </Box>
-            <PostActionButton>
-              <MoreHorizIcon />
-            </PostActionButton>
-          </Box>
-          
-          <Typography variant="body1" sx={{ mb: 2.5, lineHeight: 1.5 }}>
-            {post.content}
-          </Typography>
-          
-          {post.image && (
-            <Box 
-              component="img" 
-              src={post.image} 
-              alt="Post content"
-              sx={{
-                width: '100%',
-                borderRadius: 2,
-                mb: 2.5,
-                maxHeight: 400,
-                objectFit: 'cover',
-              }}
-            />
-          )}
-          
-          <Box display="flex" alignItems="center" color="text.secondary" mb={2}>
-            <LikeButton>
-              <ThumbUpIcon sx={{ fontSize: '1rem', mr: 0.5 }} />
-              <Typography variant="caption" fontWeight={600}>
-                {post.likes}
-              </Typography>
-            </LikeButton>
-            <Box sx={{ ml: 'auto', display: 'flex', gap: 1.5 }}>
-              <Typography variant="caption">
-                {post.comments} comments
-              </Typography>
-              <Typography variant="caption">
-                {post.shares} shares
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Divider sx={{ my: 1.5 }} />
-          
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <ActionButton 
-              fullWidth 
-              startIcon={
-                <ThumbUpIcon 
-                  color={likedPosts.includes(post.id) ? 'primary' : 'inherit'} 
-                  sx={{ 
-                    fontSize: '1.25rem',
-                    color: likedPosts.includes(post.id) ? 'primary.main' : 'inherit',
-                  }} 
-                />
-              }
-              onClick={() => handleLike(post.id)}
-              sx={{ color: likedPosts.includes(post.id) ? 'primary.main' : 'text.secondary' }}
-            >
-              Like
-            </ActionButton>
-            <ActionButton 
-              fullWidth 
-              startIcon={
-                <ChatBubbleOutlineIcon 
-                  sx={{ 
-                    fontSize: '1.25rem',
-                    color: activePost === post.id ? 'primary.main' : 'inherit',
-                  }} 
-                />
-              }
-              onClick={() => setActivePost(activePost === post.id ? null : post.id)}
-              sx={{ color: activePost === post.id ? 'primary.main' : 'text.secondary' }}
-            >
-              Comment
-            </ActionButton>
-            <ActionButton 
-              fullWidth 
-              startIcon={
-                <ShareIcon 
-                  sx={{ 
-                    fontSize: '1.25rem',
-                    transform: 'scaleX(-1)',
-                  }} 
-                />
-              }
-            >
-              Share
-            </ActionButton>
-          </Box>
-        </PostCard>
-      ))}
-      </FeedContainer>
-      
-      {/* Right Sidebar */}
-      <Box sx={{ 
-        width: 350, 
-        flexShrink: 0,
-        display: { xs: 'none', lg: 'block' },
-        position: 'sticky',
-        top: 80,
-        height: 'calc(100vh - 100px)',
-        overflowY: 'auto',
-        '&::-webkit-scrollbar': {
-          width: '4px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: 'transparent',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: (theme) => theme.palette.divider,
-          borderRadius: '4px',
-        },
-      }}>
-        <RightSidebarContent />
-      </Box>
-    </Box>
-  );
-}
+  const handleLikePost = (postId: string) => {
+    setLocalPosts(localPosts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          isLiked: !post.isLiked,
+          likes: post.isLiked ? post.likes - 1 : post.likes + 1
+        };
+      }
+      return post;
+    }));
+  };
 
+  const handleBookmarkPost = (postId: string) => {
+    setLocalPosts(localPosts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          isBookmarked: !post.isBookmarked
+        };
+      }
+      return post;
+    }));
+  };
+
+  if (loading) {
+    return <Box sx={{ pt: 2, pb: 4, backgroundColor: theme.palette.background.default, minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <CircularProgress />
+    </Box>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ pt: 2, pb: 4, backgroundColor: theme.palette.background.default, minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Typography>Please log in to continue</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Grid container spacing={3}>
+        {/* Left Sidebar */}
+        <Grid item xs={12} md={4}>
+          <StickySidebar>
+            <SidebarContent>
+              <Stack spacing={3}>
+                <Tabs
+                  value={activeTab}
+                  onChange={(e, newValue) => setActiveTab(newValue)}
+                  variant="scrollable"
+                  allowScrollButtonsMobile
+                  sx={{ mb: 2 }}
+                >
+                  <Tab icon={<AddIcon />} label="Create" value="create" />
+                  <Tab icon={<TrendingUpIcon />} label="Trending" value="trending" />
+                  <Tab icon={<NotificationsIcon />} label="Notifications" value="notifications" />
+                  <Tab icon={<BookmarkIcon />} label="Bookmarks" value="bookmarks" />
+                  <Tab icon={<ChatIcon />} label="Messages" value="messages" />
+                  <Tab icon={<GroupIcon />} label="Groups" value="groups" />
+                  <Tab icon={<VideoCameraFrontIcon />} label="Videos" value="videos" />
+                  <Tab icon={<ImageIcon />} label="Photos" value="photos" />
+                  <Tab icon={<EventAvailableIcon />} label="Events" value="events" />
+                  <Tab icon={<MoodIcon />} label="Celebrations" value="celebrations" />
+                </Tabs>
+
+                <TabPanel value={activeTab}>
+                  {activeTab === 'create' && <PostComposer />}
+                  {activeTab === 'trending' && <Trending />}
+                  {activeTab === 'notifications' && <Notifications />}
+                  {activeTab === 'bookmarks' && <Bookmarks />}
+                  {activeTab === 'messages' && <Chat />}
+                  {activeTab === 'groups' && <Groups />}
+                  {activeTab === 'videos' && <Videos />}
+                  {activeTab === 'photos' && <Photos />}
+                  {activeTab === 'events' && <Events />}
+                  {activeTab === 'celebrations' && <Celebrations />}
+                </TabPanel>
+              </Stack>
+            </SidebarContent>
+          </StickySidebar>
+        </Grid>
+
+        {/* Main Content */}
+        <Grid item xs={12} md={8}>
+          <MainContent>
+            <Stack spacing={4}>
+              <PostComposer />
+              <StoriesBar stories={storiesData} />
+              <Divider />
+              {postsData?.map((post) => (
+                <Post 
+                  key={post.id} 
+                  post={post} 
+                  onLike={handleLikePost}
+                  onBookmark={handleBookmarkPost}
+                />
+              ))}
+            </Stack>
+          </MainContent>
+        </Grid>
+
+          {/* Right Sidebar */}
+          <Hidden mdDown>
+            <Grid item lg={3}>
+              <StickySidebar>
+                <SidebarContent>
+                  {suggestedUsersLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <WhoToFollow 
+                  users={suggestedUsersData || []}
+                  onFollow={handleFollowUser}
+                  onDismiss={handleDismissSuggestion}
+                  onShowMore={() => handleShowMore('users')}
+                />
+              )}
+                  
+                  {newsItemsLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <News 
+                  items={newsItemsData || []}
+                  onNewsClick={handleNewsClick}
+                  onShowMore={() => handleShowMore('news')}
+                />
+              )}
+                  
+                  <Box sx={{ mt: 2, px: 1 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.75rem', lineHeight: 1.5 }}>
+                      2025 Social Network App
+                      <br />
+                      <span style={{ color: theme.palette.text.secondary }}>Privacy • Terms • Advertising • Ad Choices • Cookies • More</span>
+                    </Typography>
+                  </Box>
+                </SidebarContent>
+              </StickySidebar>
+            </Grid>
+          </Hidden>
+      </Grid>
+    </Container>
+  );
+};

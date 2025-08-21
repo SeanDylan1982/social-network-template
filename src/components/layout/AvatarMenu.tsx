@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Avatar,
@@ -27,8 +27,7 @@ import {
   Notifications as NotificationsIcon,
   Email as EmailIcon,
 } from '@mui/icons-material';
-import { signOut, useSession } from 'next-auth/react';
-import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface AvatarMenuProps {
   user: {
@@ -44,7 +43,7 @@ interface AvatarMenuProps {
 }
 
 const AvatarMenu: React.FC<AvatarMenuProps> = ({
-  user,
+  user: propUser,
   notificationCount = 0,
   onViewProfile,
   onSettings,
@@ -52,8 +51,8 @@ const AvatarMenu: React.FC<AvatarMenuProps> = ({
 }) => {
   const theme = useTheme();
   const router = useRouter();
-  const { data: session } = useSession();
-  const { toggleTheme, mode } = useAppTheme();
+  const { user, logout } = useAuth();
+  const currentUser = propUser || user;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -89,12 +88,12 @@ const AvatarMenu: React.FC<AvatarMenuProps> = ({
     if (onLogout) {
       onLogout();
     } else {
-      await signOut({ callbackUrl: '/auth/signin', redirect: true });
+      logout();
     }
   };
 
   const handleThemeToggle = () => {
-    toggleTheme();
+    // Theme toggle functionality can be added later
   };
 
   // Close menu when clicking outside
@@ -131,11 +130,11 @@ const AvatarMenu: React.FC<AvatarMenuProps> = ({
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           variant="dot"
           color="success"
-          invisible={!user}
+          invisible={!currentUser}
         >
           <Avatar
-            src={user?.image || '/default-avatar.png'}
-            alt={user?.name || 'User'}
+            src={currentUser?.image || '/default-avatar.png'}
+            alt={currentUser?.name || 'User'}
             sx={{
               width: 36,
               height: 36,
@@ -189,16 +188,16 @@ const AvatarMenu: React.FC<AvatarMenuProps> = ({
         <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Avatar
-              src={user?.image || '/default-avatar.png'}
-              alt={user?.name || 'User'}
+              src={currentUser?.image || '/default-avatar.png'}
+              alt={currentUser?.name || 'User'}
               sx={{ width: 48, height: 48, mr: 1.5 }}
             />
             <Box>
               <Typography variant="subtitle1" fontWeight={600} noWrap>
-                {user?.name || 'User'}
+                {currentUser?.name || 'User'}
               </Typography>
               <Typography variant="body2" color="text.secondary" noWrap>
-                {user?.email || 'user@example.com'}
+                {currentUser?.email || 'user@example.com'}
               </Typography>
             </Box>
           </Box>
@@ -238,7 +237,7 @@ const AvatarMenu: React.FC<AvatarMenuProps> = ({
             </ListItemIcon>
             <ListItemText>Settings</ListItemText>
           </MenuItem>
-          {user?.role === 'admin' && (
+          {currentUser?.role === 'admin' && (
             <MenuItem onClick={() => router.push('/admin')}>
               <ListItemIcon>
                 <AdminIcon fontSize="small" />
@@ -253,14 +252,10 @@ const AvatarMenu: React.FC<AvatarMenuProps> = ({
         {/* Theme Toggle */}
         <MenuItem onClick={handleThemeToggle}>
           <ListItemIcon>
-            {mode === 'dark' ? (
-              <LightModeIcon fontSize="small" />
-            ) : (
-              <DarkModeIcon fontSize="small" />
-            )}
+            <DarkModeIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>
-            {mode === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            Toggle Theme
           </ListItemText>
         </MenuItem>
 

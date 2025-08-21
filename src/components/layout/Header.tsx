@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { 
   AppBar, 
   Toolbar, 
@@ -81,12 +82,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [user] = useState<User | null>({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-  });
-  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const menuId = 'primary-search-account-menu';
   const isMenuOpen = Boolean(anchorEl);
 
@@ -99,22 +96,18 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   };
 
   const handleLogout = () => {
-    // Clear the token and user data
-    localStorage.removeItem('token');
-    setUser(null);
     handleMenuClose();
-    // Redirect to login page
-    navigate('/login');
+    logout();
   };
 
   const handleProfileClick = () => {
     handleMenuClose();
-    navigate('/profile');
+    router.push('/profile');
   };
 
   const handleSettingsClick = () => {
     handleMenuClose();
-    navigate('/settings');
+    router.push('/settings');
   };
 
   const renderMenu = (
@@ -161,7 +154,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </MenuItem>
         </>
       ) : (
-        <MenuItem onClick={() => navigate('/login')}>
+        <MenuItem onClick={() => router.push('/auth/signin')}>
           <ListItemIcon>
             <AccountIcon fontSize="small" />
           </ListItemIcon>
@@ -238,7 +231,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
-            onClick={() => navigate('/messages')}
+            onClick={() => router.push('/messages')}
           >
             <Badge badgeContent={4} color="error">
               <MessageIcon />
@@ -254,7 +247,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
-            onClick={() => navigate('/settings')}
+            onClick={() => router.push('/settings')}
           >
             <SettingsIcon />
           </IconButton>
@@ -268,7 +261,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
-            onClick={() => navigate('/notifications')}
+            onClick={() => router.push('/notifications')}
           >
             <Badge badgeContent={17} color="error">
               <NotificationsIcon />

@@ -38,7 +38,7 @@ app.use(express.json());
 
 // Configure CORS
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: ['http://localhost:3050', 'http://127.0.0.1:3050'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204
@@ -69,62 +69,26 @@ const startServer = async (port = 5050) => {
     // Connect to MongoDB
     await connectDB();
 
-    // Middleware
-    app.use(express.json());
-    app.use(cors({
-      origin: process.env.CLIENT_URL || 'http://localhost:3000',
-      credentials: true
-    }));
-
-    // Logging
-    if (process.env.NODE_ENV === 'development') {
-      app.use(morgan('dev'));
-    }
-
-    // Create HTTP server
-    const http = require('http');
-    const server = http.createServer(app);
-
     // Start the server
-    return new Promise((resolve, reject) => {
-      const onError = (error) => {
-        if (error.code === 'EADDRINUSE') {
-          log(`Port ${port} is already in use, trying next port...`);
-          server.close(() => {
-            startServer(port + 1).then(resolve).catch(reject);
-          });
-        } else {
-          log('Server error:', error);
-          reject(error);
-        }
-      };
-
-      server.on('error', onError);
-
-      server.listen(port, '0.0.0.0', () => {
-        log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
-        log(`API Documentation: http://localhost:${port}/api-docs`);
-        log(`Health check: http://localhost:${port}/api/health`);
-        
-        // Test if we can actually accept connections
-        const net = require('net');
-        const testSocket = new net.Socket();
-        
-        testSocket.on('error', (err) => {
-          log(`Port ${port} is not accessible: ${err.message}`);
-          server.close(() => {
-            log(`Trying next port (${port + 1})...`);
-            startServer(port + 1).then(resolve).catch(reject);
-          });
-        });
-        
-        testSocket.connect(port, '127.0.0.1', () => {
-          log(`Server is confirmed to be accepting TCP connections on port ${port}`);
-          testSocket.destroy();
-          resolve(server);
-        });
-      });
+    const server = app.listen(port, '0.0.0.0', () => {
+      log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
+      log(`Server is listening on http://localhost:${port}`);
     });
+
+    // Handle errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        log(`Port ${port} is already in use, trying next port...`);
+        server.close(() => {
+          startServer(port + 1);
+        });
+      } else {
+        log('Server error:', error);
+        process.exit(1);
+      }
+    });
+
+    return server;
   } catch (error) {
     log('Failed to start server:', error);
     process.exit(1);
@@ -136,11 +100,15 @@ const PORT = parseInt(process.env.PORT || '5050', 10);
 
 // Log environment variables for debugging
 log('Environment variables:');
-log(`- PORT: ${process.env.PORT || '5050 (default)'}`);
-log(`- NODE_ENV: ${process.env.NODE_ENV || 'development (default)'}`);
-log(`- MONGO_URI: ${process.env.MONGO_URI ? '*** (hidden for security) ***' : 'Not set!'}`);
+log('NODE_ENV:', process.env.NODE_ENV);
+log('PORT:', PORT);
+log('MONGO_URI:', process.env.MONGO_URI ? '*** (hidden for security) ***' : 'Not set');
 
-log(`\nStarting server on port ${PORT}...`);
+// Start the server
+app.listen(PORT, '0.0.0.0', () => {
+  log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  log(`Server is listening on http://localhost:${PORT}`);
+});
 
 startServer(PORT).then(server => {
   log(`Server successfully started and listening on port ${PORT}`);

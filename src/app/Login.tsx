@@ -1,8 +1,8 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Box, TextField, Button, Typography, Paper, Link, Snackbar, Alert } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { AuthContext } from '../context/AuthContext.tsx';
+import { useAuth } from '../context/AuthContext';
 
 const LoginContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -93,66 +93,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext);
+  const router = useRouter();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
     try {
-      console.log('Attempting login with:', { email });
-      const apiUrl = 'http://localhost:5051/api/users/login';
-      console.log('Calling API:', apiUrl);
-      
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Important for cookies/sessions
-      });
-
-      console.log('Response status:', response.status);
-      
-      // First, get the response text to handle both JSON and non-JSON responses
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-      
-      let data;
-      try {
-        // Try to parse as JSON, but handle non-JSON responses
-        data = responseText ? JSON.parse(responseText) : {};
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', parseError);
-        throw new Error(`Invalid response from server: ${responseText.substring(0, 100)}...`);
-      }
-
-      if (!response.ok) {
-        const errorMessage = data.message || data.error || `HTTP error! status: ${response.status}`;
-        console.error('Login failed:', errorMessage);
-        throw new Error(errorMessage);
-      }
-
-      if (!data.token) {
-        console.error('No token received in response:', data);
-        throw new Error('Authentication failed: No token received');
-      }
-
-      // Save the token to localStorage and update auth context
-      console.log('Login successful, token received');
-      localStorage.setItem('token', data.token);
-      setUser({ 
-        email, 
-        name: data.user?.name || email.split('@')[0],
-        token: data.token
-      });
+      await login(email, password);
       setShowSuccess(true);
       
       // Redirect to home after a short delay to show success message
       setTimeout(() => {
-        navigate('/');
+        router.push('/');
       }, 1000);
       
     } catch (err) {
@@ -221,7 +175,7 @@ const Login = () => {
           />
           
           <Box textAlign="right" sx={{ mb: 2 }}>
-            <Link href="/forgot-password" variant="body2" sx={{ textDecoration: 'none' }}>
+            <Link href="/auth/forgot-password" variant="body2" sx={{ textDecoration: 'none' }}>
               Forgot password?
             </Link>
           </Box>
@@ -239,7 +193,7 @@ const Login = () => {
           <Box textAlign="center" mt={2}>
             <Typography variant="body2" color="text.secondary">
               Don't have an account?{' '}
-              <Link href="/register" sx={{ fontWeight: 600, textDecoration: 'none' }}>
+              <Link href="/auth/signup" sx={{ fontWeight: 600, textDecoration: 'none' }}>
                 Sign up
               </Link>
             </Typography>

@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import Head from 'next/head';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { 
   Box, 
   Typography, 
@@ -259,6 +261,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [mobileLeftOpen, setMobileLeftOpen] = useState(false);
   const [mobileRightOpen, setMobileRightOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const { user, logout, isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const toggleLeftSidebar = () => {
     setMobileLeftOpen(!mobileLeftOpen);
@@ -310,16 +314,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     { text: 'Settings', icon: <SettingsIcon /> },
   ];
 
-  // Mock user data
-  const user = {
-    name: 'John Doe',
-    role: 'UI/UX Designer',
-    avatar: '/images/avatars/1.jpg',
-    bio: 'Creating beautiful interfaces and user experiences',
+  // User data from auth context or default
+  const userData = user ? {
+    name: user.name,
+    role: 'Member',
+    avatar: '/images/avatar.jpg',
+    bio: 'Welcome to our social network',
     stats: {
-      posts: 124,
-      followers: '2.5K',
-      following: 342,
+      posts: 0,
+      followers: '0',
+      following: 0,
+    },
+  } : {
+    name: 'Guest',
+    role: 'Visitor',
+    avatar: '/images/avatar.jpg',
+    bio: 'Please sign in to continue',
+    stats: {
+      posts: 0,
+      followers: '0',
+      following: 0,
     },
   };
 
@@ -335,27 +349,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           overlap="circular"
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           variant="dot"
-          color="success" 
+          color={isAuthenticated ? "success" : "default"} 
         >
           <UserAvatar 
-            src={user.avatar} 
-            alt={user.name}
+            src={userData.avatar} 
+            alt={userData.name}
           />
         </StyledBadge>
         <Typography variant="h6" fontWeight="bold">
-          {user.name}
+          {userData.name}
         </Typography>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {user.role}
+          {userData.role}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: '80%' }}>
-          {user.bio}
+          {userData.bio}
         </Typography>
         
         <Box display="flex" justifyContent="space-between" width="100%" mb={3}>
           <Box textAlign="center" flex={1}>
             <Typography variant="subtitle1" fontWeight="bold">
-              {user.stats.posts}
+              {userData.stats.posts}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Posts
@@ -363,7 +377,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Box>
           <Box textAlign="center" flex={1}>
             <Typography variant="subtitle1" fontWeight="bold">
-              {user.stats.followers}
+              {userData.stats.followers}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Followers
@@ -371,7 +385,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Box>
           <Box textAlign="center" flex={1}>
             <Typography variant="subtitle1" fontWeight="bold">
-              {user.stats.following}
+              {userData.stats.following}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Following
@@ -379,15 +393,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Box>
         </Box>
         
-        <Button 
-          variant="contained" 
-          color="primary" 
-          fullWidth 
-          startIcon={<AddIcon />}
-          sx={{ mb: 3, borderRadius: 2 }}
-        >
-          Create Post
-        </Button>
+        {isAuthenticated ? (
+          <Button 
+            variant="contained" 
+            color="primary" 
+            fullWidth 
+            startIcon={<AddIcon />}
+            sx={{ mb: 3, borderRadius: 2 }}
+          >
+            Create Post
+          </Button>
+        ) : (
+          <Button 
+            variant="contained" 
+            color="primary" 
+            fullWidth 
+            sx={{ mb: 3, borderRadius: 2 }}
+            onClick={() => router.push('/auth/signin')}
+          >
+            Sign In
+          </Button>
+        )}
       </UserInfo>
       
       <Divider sx={{ mx: 2 }} />
@@ -422,20 +448,39 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         
         <Divider sx={{ my: 1 }} />
         
-        <NavigationItem 
-          button
-          sx={{ px: 2, py: 1.25 }}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Logout" 
-            primaryTypographyProps={{
-              variant: 'body1',
-            }}
-          />
-        </NavigationItem>
+        {isAuthenticated ? (
+          <NavigationItem 
+            button
+            sx={{ px: 2, py: 1.25 }}
+            onClick={logout}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Logout" 
+              primaryTypographyProps={{
+                variant: 'body1',
+              }}
+            />
+          </NavigationItem>
+        ) : (
+          <NavigationItem 
+            button
+            sx={{ px: 2, py: 1.25 }}
+            onClick={() => router.push('/auth/signin')}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <PersonAddIcon />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Sign In" 
+              primaryTypographyProps={{
+                variant: 'body1',
+              }}
+            />
+          </NavigationItem>
+        )}
       </NavigationList>
     </Box>
   );
@@ -556,10 +601,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 '&:hover': { color: 'primary.main' },
                 display: { xs: 'none', sm: 'flex' },
               }}
+              onClick={() => isAuthenticated ? router.push('/profile') : router.push('/auth/signin')}
             >
               <Avatar 
-                src={user.avatar} 
-                alt={user.name}
+                src={userData.avatar} 
+                alt={userData.name}
                 sx={{ width: 32, height: 32 }}
               />
             </IconButton>

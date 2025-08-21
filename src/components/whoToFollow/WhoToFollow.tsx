@@ -12,7 +12,7 @@ import {
   Divider,
   IconButton
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';

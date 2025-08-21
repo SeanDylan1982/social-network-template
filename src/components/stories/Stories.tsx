@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import Image from 'next/image';
 import { Story as StoryType } from '../../types';
 import { styled } from '@mui/material/styles';
@@ -12,7 +12,7 @@ interface StoriesProps {
   className?: string;
 }
 
-const StyledStoryContainer = styled(Box)(({ theme }) => ({
+const StyledStoryContainer = styled(Box)<{ className?: string }>(({ theme }) => ({
   display: 'flex',
   overflowX: 'auto',
   gap: theme.spacing(2),
@@ -23,7 +23,7 @@ const StyledStoryContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledStoryItem = styled(Box)(({ theme }) => ({
+const StyledStoryItem = styled(Box)<{ className?: string }>(({ theme }) => ({
   flexShrink: 0,
   cursor: 'pointer',
   transition: theme.transitions.create(['transform']),
@@ -32,7 +32,7 @@ const StyledStoryItem = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledStoryAvatar = styled(Box)(({ theme, seen }) => ({
+const StyledStoryAvatar = styled(Box)<{ seen?: boolean }>(({ theme, seen }) => ({
   width: 80,
   height: 80,
   borderRadius: '50%',
@@ -60,7 +60,7 @@ const StyledStoryAvatar = styled(Box)(({ theme, seen }) => ({
   },
 }));
 
-const StyledStoryUsername = styled(Typography)(({ theme }) => ({
+const StyledStoryUsername = styled(Typography)<{ className?: string }>(({ theme }) => ({
   fontSize: '0.75rem',
   color: theme.palette.text.secondary,
   fontWeight: 500,
@@ -74,7 +74,69 @@ const StyledStoryUsername = styled(Typography)(({ theme }) => ({
   },
 }));
 
-const Stories: React.FC<StoriesProps> = ({ 
+const StyledStoryContainer = styled(Box)<{ className?: string }>(({ theme }) => ({
+  display: 'flex',
+  overflowX: 'auto',
+  gap: theme.spacing(2),
+  padding: theme.spacing(2, 0),
+  marginBottom: theme.spacing(4),
+  '&::-webkit-scrollbar': {
+    display: 'none',
+  },
+}));
+
+const StyledStoryItem = styled(Box)<{ className?: string }>(({ theme }) => ({
+  flexShrink: 0,
+  cursor: 'pointer',
+  transition: theme.transitions.create(['transform']),
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const StyledStoryAvatar = styled(Box)<{ seen?: boolean }>(({ theme, seen }) => ({
+  width: 80,
+  height: 80,
+  borderRadius: '50%',
+  padding: theme.spacing(0.5),
+  marginBottom: theme.spacing(1),
+  background: seen 
+    ? theme.palette.grey[100]
+    : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+  boxShadow: seen ? 'none' : theme.shadows[4],
+  position: 'relative',
+  overflow: 'hidden',
+  transition: theme.transitions.create(['transform', 'box-shadow']),
+  '&:hover': {
+    transform: 'scale(1.1)',
+    boxShadow: seen ? 'none' : theme.shadows[6],
+  },
+  '& .MuiImage-root': {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  '& .MuiAvatar-root': {
+    width: '100%',
+    height: '100%',
+  },
+}));
+
+const StyledStoryUsername = styled(Typography)<{ className?: string }>(({ theme }) => ({
+  fontSize: '0.75rem',
+  color: theme.palette.text.secondary,
+  fontWeight: 500,
+  textAlign: 'center',
+  maxWidth: '100px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  '&:hover': {
+    color: theme.palette.text.primary,
+  },
+}));
+
+const Stories: FC<StoriesProps> = ({ 
   stories = [], 
   onAddStory,
   onStoryClick = () => {},
@@ -138,19 +200,13 @@ const Stories: React.FC<StoriesProps> = ({
         </StyledStoryAvatar>
         <StyledStoryUsername variant="body2">Your Story</StyledStoryUsername>
       </StyledStoryItem>
-        <div className="relative w-20 h-20 rounded-full bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center mb-1.5 group-hover:bg-gray-100 transition-colors">
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white group-hover:bg-blue-600 transition-colors">
-            <span className="text-xl leading-none">+</span>
-          </div>
-        </div>
-        <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
-          Your Story
-        </span>
-      </div>
-      
-      {/* Story Items */}
-      {displayStories.map((story) => (
-        <StyledStoryItem key={story.id} onClick={() => onStoryClick(story.id)}>
+
+      {/* Display Stories */}
+      {displayStories.map((story: StoryType) => (
+        <StyledStoryItem
+          key={story.id}
+          onClick={() => onStoryClick(story.id)}
+        >
           <StyledStoryAvatar seen={story.seen}>
             <Box
               sx={{
@@ -168,8 +224,7 @@ const Stories: React.FC<StoriesProps> = ({
                 alt={story.username}
                 width={80}
                 height={80}
-                className="w-full h-full object-cover"
-                priority
+                style={{ objectFit: 'cover' }}
               />
             </Box>
             {!story.seen && (
@@ -184,6 +239,11 @@ const Stories: React.FC<StoriesProps> = ({
               />
             )}
           </StyledStoryAvatar>
+          <StyledStoryUsername variant="body2">{story.username}</StyledStoryUsername>
+        </StyledStoryItem>
+      ))}
+    </StyledStoryContainer>
+  );
           <StyledStoryUsername variant="body2">{story.username}</StyledStoryUsername>
         </StyledStoryItem>
       ))}

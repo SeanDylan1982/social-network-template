@@ -11,6 +11,7 @@ import { SnackbarProvider } from 'notistack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import FixedMainLayout from "@/components/layout/FixedMainLayout";
+import { AuthProvider } from "@/context/AuthContext";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -39,9 +40,11 @@ export default function ClientLayout({
               autoHideDuration={3000}
             >
               <CssBaseline />
-              <FixedMainLayout>
-                {children}
-              </FixedMainLayout>
+              <AuthProvider>
+                <FixedMainLayout>
+                  {children}
+                </FixedMainLayout>
+              </AuthProvider>
               <ReactQueryDevtools initialIsOpen={false} />
             </SnackbarProvider>
           </ThemeProvider>
