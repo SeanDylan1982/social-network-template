@@ -1,97 +1,98 @@
-import React from 'react';
-import { styled } from '@mui/material/styles';
+import * as React from 'react';
 import {
   Dialog as MuiDialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  useTheme,
-  IconButton,
+  DialogTitle as MuiDialogTitle,
+  DialogContent as MuiDialogContent,
+  DialogActions as MuiDialogActions,
+  DialogProps as MuiDialogProps,
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
 
-interface DialogProps {
-  open: boolean;
-  title: string;
-  content: React.ReactNode;
-  actions?: React.ReactNode;
-  onClose: () => void;
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  fullWidth?: boolean;
-  sx?: any;
-}
+const Dialog = React.forwardRef<HTMLDivElement, MuiDialogProps>(
+  ({ children, ...props }, ref) => (
+    <MuiDialog ref={ref} {...props}>
+      {children}
+    </MuiDialog>
+  )
+);
+Dialog.displayName = 'Dialog';
 
-const StyledDialog = styled(MuiDialog)(({ theme }) => ({
-  '& .MuiDialog-paper': {
-    borderRadius: theme.shape.borderRadius,
-    boxShadow: theme.shadows[8],
-  },
-}));
+const DialogTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ children, ...props }, ref) => (
+  <button ref={ref} {...props}>
+    {children}
+  </button>
+));
+DialogTrigger.displayName = 'DialogTrigger';
 
-const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-}));
+const DialogContent = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<typeof MuiDialogContent>
+>(({ children, ...props }, ref) => (
+  <MuiDialogContent ref={ref} {...props}>
+    {children}
+  </MuiDialogContent>
+));
+DialogContent.displayName = 'DialogContent';
 
-const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
-  padding: theme.spacing(4),
-  '&:last-child': {
-    paddingBottom: theme.spacing(4),
-  },
-}));
+const DialogHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ children, ...props }, ref) => (
+  <div ref={ref} {...props}>
+    {children}
+  </div>
+));
+DialogHeader.displayName = 'DialogHeader';
 
-const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderTop: `1px solid ${theme.palette.divider}`,
-  justifyContent: 'flex-end',
-}));
+const DialogTitle = React.forwardRef<
+  HTMLHeadingElement,
+  React.ComponentProps<typeof MuiDialogTitle>
+>(({ children, ...props }, ref) => (
+  <MuiDialogTitle ref={ref} {...props}>
+    {children}
+  </MuiDialogTitle>
+));
+DialogTitle.displayName = 'DialogTitle';
 
-const Dialog: React.FC<DialogProps> = ({
-  open,
-  title,
-  content,
-  actions,
-  onClose,
-  maxWidth = 'md',
-  fullWidth = true,
-  sx,
-}) => {
-  const theme = useTheme();
+const DialogDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ children, ...props }, ref) => (
+  <p ref={ref} {...props}>
+    {children}
+  </p>
+));
+DialogDescription.displayName = 'DialogDescription';
 
-  return (
-    <StyledDialog
-      open={open}
-      onClose={onClose}
-      maxWidth={maxWidth}
-      fullWidth={fullWidth}
-      sx={sx}
-    >
-      <StyledDialogTitle>
-        <Typography variant="h6" fontWeight="bold">
-          {title}
-        </Typography>
-        <IconButton
-          size="small"
-          onClick={onClose}
-          sx={{
-            color: theme.palette.text.secondary,
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
-            },
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </StyledDialogTitle>
-      <StyledDialogContent>{content}</StyledDialogContent>
-      {actions && <StyledDialogActions>{actions}</StyledDialogActions>}
-    </StyledDialog>
-  );
+const DialogFooter = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<typeof MuiDialogActions>
+>(({ children, ...props }, ref) => (
+  <MuiDialogActions ref={ref} {...props}>
+    {children}
+  </MuiDialogActions>
+));
+DialogFooter.displayName = 'DialogFooter';
+
+const DialogClose = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ children, ...props }, ref) => (
+  <button ref={ref} {...props}>
+    {children}
+  </button>
+));
+DialogClose.displayName = 'DialogClose';
+
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
 };
-
-export default Dialog;

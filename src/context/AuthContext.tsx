@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const token = localStorage.getItem('token');
         if (token) {
           // In a real app, you would verify the token here
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

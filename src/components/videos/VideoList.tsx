@@ -26,7 +26,7 @@ interface VideoListProps {
   className?: string;
 }
 
-export function VideoList({ 
+function VideoList({ 
   videos = [], 
   hasMore = false, 
   onLoadMore, 
@@ -305,3 +305,6 @@ function VideoFilterSkeleton() {
 function cn(...classes: (string | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }
+
+export { VideoList };
+export default VideoList;

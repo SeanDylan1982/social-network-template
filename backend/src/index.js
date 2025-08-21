@@ -38,7 +38,7 @@ app.use(express.json());
 
 // Configure CORS
 const corsOptions = {
-  origin: ['http://localhost:3050', 'http://127.0.0.1:3050'],
+  origin: ['http://localhost:3000', 'http://localhost:3050', 'http://127.0.0.1:3050'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204

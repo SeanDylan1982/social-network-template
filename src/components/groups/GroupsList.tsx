@@ -24,7 +24,7 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import PublicIcon from '@mui/icons-material/Public';
 import LockIcon from '@mui/icons-material/Lock';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 interface GroupsListProps {
   groups: Group[];
@@ -37,7 +37,7 @@ interface GroupsListProps {
   loading?: boolean;
   currentCategory?: string;
   currentFilter?: string;
-}\n
+}
 const GroupsList: React.FC<GroupsListProps> = ({
   groups,
   categories,

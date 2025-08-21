@@ -19,6 +19,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -29,12 +30,12 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/register`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, username }),
       });
 
       if (!response.ok) {
@@ -79,6 +80,14 @@ export default function SignUpPage() {
                 label="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 margin="normal"
                 required
               />

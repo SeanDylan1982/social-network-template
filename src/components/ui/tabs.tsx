@@ -101,4 +101,29 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, sx }) => {
   );
 };
 
-export { Tabs, Tab, TabPanel };
+const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ children, ...props }, ref) => (
+    <Box ref={ref} {...props}>
+      {children}
+    </Box>
+  )
+);
+TabsList.displayName = 'TabsList';
+
+const TabsTrigger = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof MuiTab>>(
+  ({ children, ...props }, ref) => (
+    <MuiTab ref={ref} {...props} label={children} />
+  )
+);
+TabsTrigger.displayName = 'TabsTrigger';
+
+const TabsContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { value: string }>(
+  ({ children, ...props }, ref) => (
+    <div ref={ref} {...props}>
+      {children}
+    </div>
+  )
+);
+TabsContent.displayName = 'TabsContent';
+
+export { Tabs, Tab, TabPanel, TabsList, TabsTrigger, TabsContent };

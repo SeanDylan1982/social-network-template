@@ -18,7 +18,7 @@ import {
   Paper,
   Tabs,
   Tab,
-  TabPanel,
+
   Stack,
   Skeleton,
   useMediaQuery,
@@ -233,16 +233,16 @@ const posts = [
   },
 ];
 
-const Home: React.FC = () => {
+export default function Home() {
   const { user, isAuthenticated, loading } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [activeTab, setActiveTab] = useState('home');
+    const [activeTab, setActiveTab] = useState('create');
 
   const { data: postsData, isLoading: postsLoading } = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`);
       if (!response.ok) {
         throw new Error('Failed to fetch posts');
       }
@@ -255,7 +255,7 @@ const Home: React.FC = () => {
   const { data: storiesData, isLoading: storiesLoading } = useQuery({
     queryKey: ['stories'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stories`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stories`);
       if (!response.ok) {
         throw new Error('Failed to fetch stories');
       }
@@ -266,7 +266,7 @@ const Home: React.FC = () => {
   const { data: suggestedUsersData, isLoading: suggestedUsersLoading } = useQuery({
     queryKey: ['suggestedUsers'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/suggested`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/suggested`);
       if (!response.ok) {
         throw new Error('Failed to fetch suggested users');
       }
@@ -277,7 +277,7 @@ const Home: React.FC = () => {
   const { data: newsItemsData, isLoading: newsItemsLoading } = useQuery({
     queryKey: ['newsItems'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/news`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/news`);
       if (!response.ok) {
         throw new Error('Failed to fetch news items');
       }
@@ -407,7 +407,7 @@ const Home: React.FC = () => {
                   <Tab icon={<MoodIcon />} label="Celebrations" value="celebrations" />
                 </Tabs>
 
-                <TabPanel value={activeTab}>
+                <Box>
                   {activeTab === 'create' && <PostComposer />}
                   {activeTab === 'trending' && <Trending />}
                   {activeTab === 'notifications' && <Notifications />}
@@ -418,7 +418,7 @@ const Home: React.FC = () => {
                   {activeTab === 'photos' && <Photos />}
                   {activeTab === 'events' && <Events />}
                   {activeTab === 'celebrations' && <Celebrations />}
-                </TabPanel>
+                </Box>
               </Stack>
             </SidebarContent>
           </StickySidebar>
@@ -429,14 +429,12 @@ const Home: React.FC = () => {
           <MainContent>
             <Stack spacing={4}>
               <PostComposer />
-              <StoriesBar stories={storiesData} />
+              <StoriesBar stories={storiesData || stories} />
               <Divider />
-              {postsData?.map((post) => (
+              {(postsData || localPosts)?.map((post) => (
                 <Post 
                   key={post.id} 
-                  post={post} 
-                  onLike={handleLikePost}
-                  onBookmark={handleBookmarkPost}
+                  {...post}
                 />
               ))}
             </Stack>
@@ -487,4 +485,4 @@ const Home: React.FC = () => {
       </Grid>
     </Container>
   );
-};
+}

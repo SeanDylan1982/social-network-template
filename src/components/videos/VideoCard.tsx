@@ -11,6 +11,8 @@ import {
   Play,
   Share2,
   ThumbsUp,
+  Plus,
+  Flag,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -28,6 +30,7 @@ export interface VideoCardProps {
     duration: string;
     viewCount: number;
     publishedAt: string;
+    description?: string;
     isLive?: boolean;
     isWatched?: boolean;
     isBookmarked?: boolean;

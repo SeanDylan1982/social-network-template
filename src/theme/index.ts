@@ -128,6 +128,7 @@ export const theme = createTheme({
           height: '100%',
           width: '100%',
         },
+        '*': {
           color: '#1A1A1A',
           '&::-webkit-scrollbar': {
             width: '8px',
@@ -141,6 +142,7 @@ export const theme = createTheme({
             borderRadius: '4px',
             '&:hover': {
               background: '#A8A8A8',
+            },
           },
         },
       },

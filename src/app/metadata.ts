@@ -6,6 +6,4 @@ export const metadata: Metadata = {
   description: "Connect with friends and the world around you",
 };
 
-export const viewport = {
-  themeColor: "#2F80ED",
-};
+

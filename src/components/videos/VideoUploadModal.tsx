@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@mui/material';
 import {
   Card,
   CardContent,
@@ -63,126 +64,7 @@ interface VideoUploadModalProps {
   onUploadComplete?: (videoId: string) => void;
 }
 
-const StyledDialog = styled(DialogContent)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: theme.shadows[6],
-  '& .MuiDialogTitle-root': {
-    padding: theme.spacing(4),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-  '& .MuiDialogContent-root': {
-    padding: theme.spacing(4),
-  },
-  '& .MuiDialogActions-root': {
-    padding: theme.spacing(4),
-    borderTop: `1px solid ${theme.palette.divider}`,
-  },
-}));
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: theme.shadows[4],
-  '&:hover': {
-    boxShadow: theme.shadows[6],
-    transform: 'translateY(-2px)',
-    transition: theme.transitions.create(['box-shadow', 'transform']),
-  },
-  '& .MuiCardHeader-root': {
-    padding: theme.spacing(3),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-  '& .MuiCardContent-root': {
-    padding: theme.spacing(3),
-  },
-  '& .MuiCardFooter-root': {
-    padding: theme.spacing(3),
-    borderTop: `1px solid ${theme.palette.divider}`,
-  },
-}));
-
-const StyledTabs = styled(Tabs)(({ theme }) => ({
-  '& .MuiTabs-root': {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-  '& .MuiTabs-indicator': {
-    backgroundColor: theme.palette.primary.main,
-  },
-  '& .MuiTab-root': {
-    minWidth: '120px',
-    padding: theme.spacing(2),
-    margin: 0,
-    '&.Mui-selected': {
-      color: theme.palette.primary.main,
-    },
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  textTransform: 'none',
-  fontWeight: 600,
-  '&:hover': {
-    transform: 'translateY(-1px)',
-  },
-}));
-
-const StyledInput = styled(Input)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: theme.palette.divider,
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-    },
-  },
-}));
-
-const StyledTextarea = styled(Textarea)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: theme.palette.divider,
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-    },
-  },
-}));
-
-const StyledSelect = styled(Select)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: theme.palette.divider,
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-    },
-  },
-}));
-
-const StyledProgress = styled(Progress)(({ theme }) => ({
-  height: '8px',
-  borderRadius: '4px',
-  backgroundColor: theme.palette.action.disabledBackground,
-  '& .MuiLinearProgress-bar': {
-    borderRadius: '4px',
-    backgroundColor: theme.palette.primary.main,
-  },
-}));
 
 export function VideoUploadModal({
   children,

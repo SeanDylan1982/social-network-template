@@ -741,3 +741,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 };
 
 export default MainLayout;
+export { MainLayout as FixedMainLayout };
